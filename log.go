@@ -19,54 +19,6 @@ const (
 	DebugLevel Level = zap.DebugLevel // -1
 )
 
-var (
-	Info   = stdLogger.Info
-	Warn   = stdLogger.Warn
-	Error  = stdLogger.Error
-	DPanic = stdLogger.DPanic
-	Panic  = stdLogger.Panic
-	Fatal  = stdLogger.Fatal
-	Debug  = stdLogger.Debug
-
-	SugaredInfo   = stdLogger.SugaredInfo
-	SugaredInfof  = stdLogger.SugaredInfof
-	SugaredWarn   = stdLogger.SugaredWarn
-	SugaredWarnf  = stdLogger.SugaredWarnf
-	SugaredError  = stdLogger.SugaredError
-	SugaredErrorf = stdLogger.SugaredErrorf
-	SugaredPanic  = stdLogger.SugaredPanic
-	SugaredPanicf = stdLogger.SugaredPanicf
-	SugaredFatal  = stdLogger.SugaredFatal
-	SugaredFatalf = stdLogger.SugaredFatal
-	SugaredDebug  = stdLogger.SugaredDebug
-	SugaredDebugf = stdLogger.SugaredDebugf
-)
-
-// not safe for concurrent use
-func resetStdLogger(l *Logger) {
-	stdLogger = l
-	Info = stdLogger.Info
-	Warn = stdLogger.Warn
-	Error = stdLogger.Error
-	DPanic = stdLogger.DPanic
-	Panic = stdLogger.Panic
-	Fatal = stdLogger.Fatal
-	Debug = stdLogger.Debug
-
-	SugaredInfo = stdLogger.SugaredInfo
-	SugaredInfof = stdLogger.SugaredInfof
-	SugaredWarn = stdLogger.SugaredWarn
-	SugaredWarnf = stdLogger.SugaredWarnf
-	SugaredError = stdLogger.SugaredError
-	SugaredErrorf = stdLogger.SugaredErrorf
-	SugaredPanic = stdLogger.SugaredPanic
-	SugaredPanicf = stdLogger.SugaredPanicf
-	SugaredFatal = stdLogger.SugaredFatal
-	SugaredFatalf = stdLogger.SugaredFatal
-	SugaredDebug = stdLogger.SugaredDebug
-	SugaredDebugf = stdLogger.SugaredDebugf
-}
-
 var stdLogger = newLogger()
 
 // SyncFunc calls the underlying Core's Sync method, flushing any buffered log
@@ -79,22 +31,23 @@ type SyncFunc func()
 // log will sync to std out if stdout is true
 func InitWithPath(dir, prefix string, stdout bool) SyncFunc {
 	initLog(dir, prefix, InfoLevel, stdout)
-	return sync
+	return loggerSync
 }
 
 // Init is same as InitWithPath but with a default dir "./"
 func Init(prefix string, stdout bool) SyncFunc {
 	initLog("./", prefix, InfoLevel, stdout)
-	return sync
+	return loggerSync
 }
 
 func initLog(dir, prefix string, level Level, stdout bool) {
-	resetStdLogger(NewLogger(dir, prefix, level, stdout))
+	stdLogger = NewLogger(dir, prefix, level, stdout)
 }
 
-func sync() {
+func loggerSync() {
 	if stdLogger != nil {
 		_ = stdLogger.logger.Sync()
+		_ = stdLogger.sugaredLogger.Sync()
 	}
 }
 
@@ -102,75 +55,81 @@ func StdLogger() *Logger {
 	return stdLogger
 }
 
-func (l *Logger) Debug(msg string, fields ...Field) {
-	l.logger.Debug(msg, fields...)
+// warp stdLogger.logger
+func Debug(msg string, fields ...Field) {
+	stdLogger.logger.Debug(msg, fields...)
 }
 
-func (l *Logger) Info(msg string, fields ...Field) {
-	l.logger.Info(msg, fields...)
+func Info(msg string, fields ...Field) {
+	stdLogger.logger.Info(msg, fields...)
 }
 
-func (l *Logger) Warn(msg string, fields ...Field) {
-	l.logger.Warn(msg, fields...)
+func Warn(msg string, fields ...Field) {
+	stdLogger.logger.Warn(msg, fields...)
 }
 
-func (l *Logger) Error(msg string, fields ...Field) {
-	l.logger.Error(msg, fields...)
+func Error(msg string, fields ...Field) {
+	stdLogger.logger.Error(msg, fields...)
 }
-func (l *Logger) DPanic(msg string, fields ...Field) {
-	l.logger.DPanic(msg, fields...)
+func DPanic(msg string, fields ...Field) {
+	stdLogger.logger.DPanic(msg, fields...)
 }
-func (l *Logger) Panic(msg string, fields ...Field) {
-	l.logger.Panic(msg, fields...)
+func Panic(msg string, fields ...Field) {
+	stdLogger.logger.Panic(msg, fields...)
 }
-func (l *Logger) Fatal(msg string, fields ...Field) {
-	l.logger.Fatal(msg, fields...)
-}
-
-func (l *Logger) SugaredDebug(args ...interface{}) {
-	l.sugaredLogger.Debug(args...)
+func Fatal(msg string, fields ...Field) {
+	stdLogger.logger.Fatal(msg, fields...)
 }
 
-func (l *Logger) SugaredDebugf(format string, args ...interface{}) {
-	l.sugaredLogger.Debugf(format, args...)
+// warp stdLogger.sugaredLogger
+func SugaredDebug(args ...interface{}) {
+	stdLogger.sugaredLogger.Debug(args...)
 }
 
-func (l *Logger) SugaredInfo(args ...interface{}) {
-	l.sugaredLogger.Info(args...)
+func SugaredDebugf(format string, args ...interface{}) {
+	stdLogger.sugaredLogger.Debugf(format, args...)
 }
 
-func (l *Logger) SugaredInfof(format string, args ...interface{}) {
-	l.sugaredLogger.Infof(format, args...)
+func SugaredInfo(args ...interface{}) {
+	stdLogger.sugaredLogger.Info(args...)
 }
 
-func (l *Logger) SugaredWarn(args ...interface{}) {
-	l.sugaredLogger.Warn(args...)
+func SugaredInfof(format string, args ...interface{}) {
+	stdLogger.sugaredLogger.Infof(format, args...)
 }
 
-func (l *Logger) SugaredWarnf(format string, args ...interface{}) {
-	l.sugaredLogger.Warnf(format, args...)
+func SugaredWarn(args ...interface{}) {
+	stdLogger.sugaredLogger.Warn(args...)
 }
 
-func (l *Logger) SugaredError(args ...interface{}) {
-	l.sugaredLogger.Error(args...)
+func SugaredWarnf(format string, args ...interface{}) {
+	stdLogger.sugaredLogger.Warnf(format, args...)
 }
 
-func (l *Logger) SugaredErrorf(format string, args ...interface{}) {
-	l.sugaredLogger.Errorf(format, args...)
+func SugaredError(args ...interface{}) {
+	stdLogger.sugaredLogger.Error(args...)
 }
 
-func (l *Logger) SugaredFatal(args ...interface{}) {
-	l.sugaredLogger.Fatal(args...)
+func SugaredErrorf(format string, args ...interface{}) {
+	stdLogger.sugaredLogger.Errorf(format, args...)
 }
 
-func (l *Logger) SugaredFatalf(format string, args ...interface{}) {
-	l.sugaredLogger.Fatalf(format, args...)
+// SugaredFatal uses fmt.Sprint to construct and log a message, then calls os.Exit.
+func SugaredFatal(args ...interface{}) {
+	stdLogger.sugaredLogger.Fatal(args...)
 }
 
-func (l *Logger) SugaredPanic(args ...interface{}) {
-	l.sugaredLogger.Panic(args...)
+// SugaredFatalf uses fmt.Sprintf to log a templated message, then calls os.Exit.
+func SugaredFatalf(format string, args ...interface{}) {
+	stdLogger.sugaredLogger.Fatalf(format, args...)
 }
 
-func (l *Logger) SugaredPanicf(format string, args ...interface{}) {
-	l.sugaredLogger.Panicf(format, args...)
+// SugaredPanic uses fmt.Sprint to construct and log a message, then panics.
+func SugaredPanic(args ...interface{}) {
+	stdLogger.sugaredLogger.Panic(args...)
+}
+
+// SugaredPanicf uses fmt.Sprintf to log a templated message, then panics.
+func SugaredPanicf(format string, args ...interface{}) {
+	stdLogger.sugaredLogger.Panicf(format, args...)
 }
