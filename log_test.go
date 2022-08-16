@@ -44,7 +44,7 @@ func TestInfo(t *testing.T) {
 
 func TestSugaredInfo(t *testing.T) {
 	t.Parallel()
-	sync := Init("tmp", true)
+	sync := Init("dev", true)
 	defer sync()
 	for i := 0; i < 20000; i++ {
 		SugaredInfof("TestSugaredInfo:RandStr=%s", RandStringRunes(10))
