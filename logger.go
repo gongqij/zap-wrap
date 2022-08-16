@@ -24,12 +24,12 @@ const (
 
 func NewLogger(dir, prefix string, level Level, stdout bool) *Logger {
 	var encoder zapcore.Encoder
-	withCaller := true
+	showCaller := true
 	if os.Getenv("APP_ENV") == DevEnv {
 		encoder = customDevEncoder()
 	} else {
 		encoder = customProdEncoder()
-		withCaller = false
+		showCaller = false
 	}
 	rotateCfg, _ := rotateLogs.New(
 		path.Join(dir, prefix)+".%Y-%m-%d.log",
@@ -42,12 +42,10 @@ func NewLogger(dir, prefix string, level Level, stdout bool) *Logger {
 	if stdout {
 		opts = append(opts, zapcore.AddSync(os.Stderr))
 	}
-	syncWriter := zapcore.NewMultiWriteSyncer(opts...)
-
-	core := zapcore.NewCore(encoder, syncWriter, level)
+	core := zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(opts...), level)
 
 	logger := &Logger{
-		logger: zap.New(core, zap.WithCaller(withCaller)),
+		logger: zap.New(core, zap.WithCaller(showCaller)),
 	}
 	logger.sugaredLogger = logger.logger.Sugar()
 	return logger
@@ -61,16 +59,17 @@ func customDevEncoder() zapcore.Encoder {
 		enc.AppendString("[" + level.CapitalString() + "]")
 	}
 	encoderConf := zapcore.EncoderConfig{
-		CallerKey:      "caller",
-		LevelKey:       "level",
-		MessageKey:     "msg",
-		TimeKey:        encoderTimeKey,
-		StacktraceKey:  "stacktrace",
-		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeTime:     customTimeEncoder,
-		EncodeLevel:    customLevelEncoder,
-		EncodeCaller:   zapcore.FullCallerEncoder,
-		EncodeDuration: zapcore.SecondsDurationEncoder,
+		CallerKey:        "caller",
+		LevelKey:         "level",
+		MessageKey:       "msg",
+		TimeKey:          encoderTimeKey,
+		StacktraceKey:    "stacktrace",
+		LineEnding:       zapcore.DefaultLineEnding,
+		EncodeTime:       customTimeEncoder,
+		EncodeLevel:      customLevelEncoder,
+		EncodeCaller:     zapcore.FullCallerEncoder,
+		EncodeDuration:   zapcore.SecondsDurationEncoder,
+		ConsoleSeparator: " ",
 	}
 	return zapcore.NewConsoleEncoder(encoderConf)
 }
