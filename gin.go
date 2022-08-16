@@ -11,23 +11,50 @@ const (
 )
 
 const (
-	requestStartTimeKey = "start"
-	queryPathKey        = "path"
-	nameKey             = "name"
+	requestStartTimeKey   = "start"
+	requestEndTimeKey     = "end"
+	requestDurationKey    = "duration"
+	requestStatusKey      = "status"
+	requestURLRawQueryKey = "query"
+	requestClientIPKey    = "ip"
+	requestUserAgentKey   = "user-agent"
+	requestURLPath        = "path"
+
+	nameKey = "name"
 )
 
 // GinHandler return a gin middleware, you should add it to gin server.
 func GinHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		start := time.Now()
+		path := c.Request.URL.Path
 		fields := []Field{
-			ZapString(requestStartTimeKey, time.Now().Format(logTimeFormatter)),
-			ZapString(queryPathKey, c.Request.URL.Path),
+			ZapString(requestStartTimeKey, start.Format(logTimeFormatter)),
+			ZapString(requestURLPath, path),
 		}
 		var fieldsInterface []interface{}
-		fieldsInterface = append(fieldsInterface, requestStartTimeKey, time.Now().Format(logTimeFormatter))
-		fieldsInterface = append(fieldsInterface, queryPathKey, c.Request.URL.Path)
+		fieldsInterface = append(fieldsInterface, requestStartTimeKey, start.Format(logTimeFormatter))
+		fieldsInterface = append(fieldsInterface, requestURLPath, path)
 		c.Set(ContextLogKey, stdLogger.withFields(fields, fieldsInterface))
 		c.Next()
+		end := time.Now()
+		latency := end.Sub(start)
+		if len(c.Errors) > 0 {
+			for _, e := range c.Errors.Errors() {
+				stdLogger.Error(e)
+			}
+		} else {
+			fields := []Field{
+				ZapInt(requestStatusKey, c.Writer.Status()),
+				ZapString(requestStartTimeKey, start.Format(logTimeFormatter)),
+				ZapString(requestEndTimeKey, end.Format(logTimeFormatter)),
+				ZapDuration(requestDurationKey, latency),
+				ZapString(requestURLRawQueryKey, c.Request.URL.RawQuery),
+				ZapString(requestClientIPKey, c.ClientIP()),
+				ZapString(requestUserAgentKey, c.Request.UserAgent()),
+			}
+			stdLogger.Info(c.Request.Method+" "+path, fields...)
+		}
 	}
 }
 

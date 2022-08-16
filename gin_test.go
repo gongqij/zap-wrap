@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,10 +20,12 @@ func TestGinLog(t *testing.T) {
 	testServer.Use(GinHandler())
 
 	testServer.GET("/ginlog", func(c *gin.Context) {
+		time.Sleep(time.Second * 2)
 		log := GetFromGin(c)
 		log.Info("ginlog test")
 	})
 	testServer.GET("/ginlogwithname", func(c *gin.Context) {
+		time.Sleep(time.Second)
 		log := GetFromGinWithName(c, "test")
 		log.Info("ginlog test with name")
 	})
