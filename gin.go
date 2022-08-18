@@ -60,7 +60,7 @@ func GinHandler() gin.HandlerFunc {
 				ZapString(requestClientIPKey, c.ClientIP()),
 				ZapString(requestUserAgentKey, c.Request.UserAgent()),
 			}
-			stdLogger.Info(c.Request.Method+" "+path, fields...)
+			stdLogger.InfoWithFields(c.Request.Method+" "+path, fields...)
 		}
 	}
 }
@@ -87,15 +87,15 @@ func RecoveryWithZap(stack bool) gin.HandlerFunc {
 				httpRequest, _ := httputil.DumpRequest(c.Request, false)
 				httpRequest = httpRequest[:len(httpRequest)-2]
 				if brokenPipe {
-					stdLogger.SugaredErrorf("[Broken Pipe]:\n[Request]:\n%s[Error]:\n%s", string(httpRequest), err)
+					stdLogger.Errorf("[Broken Pipe]:\n[Request]:\n%s[Error]:\n%s", string(httpRequest), err)
 					// If the connection is dead, we can't write a status to it.
 					c.Error(err.(error)) // nolint: errcheck
 					c.Abort()
 				}
 				if stack {
-					stdLogger.SugaredErrorf("[Recovery from panic]:\n[Request]:\n%s[Error]:\n%s\n[Stack]:\n%s", string(httpRequest), err, string(debug.Stack()))
+					stdLogger.Errorf("[Recovery from panic]:\n[Request]:\n%s[Error]:\n%s\n[Stack]:\n%s", string(httpRequest), err, string(debug.Stack()))
 				} else {
-					stdLogger.SugaredErrorf("[Recovery from panic]:\n[Request]:\n%s[Error]:\n%s", string(httpRequest), err)
+					stdLogger.Errorf("[Recovery from panic]:\n[Request]:\n%s[Error]:\n%s", string(httpRequest), err)
 				}
 				c.AbortWithStatus(http.StatusInternalServerError)
 			}

@@ -109,75 +109,75 @@ func (l *Logger) withFields(fields []Field, fieldsInterface []interface{}) *Logg
 	}
 }
 
-func (l *Logger) Debug(msg string, fields ...Field) {
+func (l *Logger) DebugWithFields(msg string, fields ...Field) {
 	l.logger.Debug(msg, fields...)
 }
 
-func (l *Logger) Info(msg string, fields ...Field) {
+func (l *Logger) InfoWithFields(msg string, fields ...Field) {
 	l.logger.Info(msg, fields...)
 }
 
-func (l *Logger) Warn(msg string, fields ...Field) {
+func (l *Logger) WarnWithFields(msg string, fields ...Field) {
 	l.logger.Warn(msg, fields...)
 }
 
-func (l *Logger) Error(msg string, fields ...Field) {
+func (l *Logger) ErrorWithFields(msg string, fields ...Field) {
 	l.logger.Error(msg, fields...)
 }
-func (l *Logger) DPanic(msg string, fields ...Field) {
+func (l *Logger) DPanicWithFields(msg string, fields ...Field) {
 	l.logger.DPanic(msg, fields...)
 }
-func (l *Logger) Panic(msg string, fields ...Field) {
+func (l *Logger) PanicWithFields(msg string, fields ...Field) {
 	l.logger.Panic(msg, fields...)
 }
-func (l *Logger) Fatal(msg string, fields ...Field) {
+func (l *Logger) FatalWithFields(msg string, fields ...Field) {
 	l.logger.Fatal(msg, fields...)
 }
 
-func (l *Logger) SugaredDebug(args ...interface{}) {
+func (l *Logger) Debug(args ...interface{}) {
 	l.sugaredLogger.Debug(args...)
 }
 
-func (l *Logger) SugaredDebugf(format string, args ...interface{}) {
+func (l *Logger) Debugf(format string, args ...interface{}) {
 	l.sugaredLogger.Debugf(format, args...)
 }
 
-func (l *Logger) SugaredInfo(args ...interface{}) {
+func (l *Logger) Info(args ...interface{}) {
 	l.sugaredLogger.Info(args...)
 }
 
-func (l *Logger) SugaredInfof(format string, args ...interface{}) {
+func (l *Logger) Infof(format string, args ...interface{}) {
 	l.sugaredLogger.Infof(format, args...)
 }
 
-func (l *Logger) SugaredWarn(args ...interface{}) {
+func (l *Logger) Warn(args ...interface{}) {
 	l.sugaredLogger.Warn(args...)
 }
 
-func (l *Logger) SugaredWarnf(format string, args ...interface{}) {
+func (l *Logger) Warnf(format string, args ...interface{}) {
 	l.sugaredLogger.Warnf(format, args...)
 }
 
-func (l *Logger) SugaredError(args ...interface{}) {
+func (l *Logger) Error(args ...interface{}) {
 	l.sugaredLogger.Error(args...)
 }
 
-func (l *Logger) SugaredErrorf(format string, args ...interface{}) {
+func (l *Logger) Errorf(format string, args ...interface{}) {
 	l.sugaredLogger.Errorf(format, args...)
 }
 
-func (l *Logger) SugaredFatal(args ...interface{}) {
+func (l *Logger) Fatal(args ...interface{}) {
 	l.sugaredLogger.Fatal(args...)
 }
 
-func (l *Logger) SugaredFatalf(format string, args ...interface{}) {
+func (l *Logger) Fatalf(format string, args ...interface{}) {
 	l.sugaredLogger.Fatalf(format, args...)
 }
 
-func (l *Logger) SugaredPanic(args ...interface{}) {
+func (l *Logger) Panic(args ...interface{}) {
 	l.sugaredLogger.Panic(args...)
 }
 
-func (l *Logger) SugaredPanicf(format string, args ...interface{}) {
+func (l *Logger) Panicf(format string, args ...interface{}) {
 	l.sugaredLogger.Panicf(format, args...)
 }
