@@ -17,12 +17,13 @@ func TestGinLog(t *testing.T) {
 	defer loggerSync()
 
 	testServer := gin.New()
-	testServer.Use(GinHandler())
+	testServer.Use(GinHandler(), RecoveryWithZap(true))
 
 	testServer.GET("/ginlog", func(c *gin.Context) {
 		time.Sleep(time.Second * 2)
 		log := GetFromGin(c)
 		log.Info("ginlog test")
+		panic("ginlog test panic")
 	})
 	testServer.GET("/ginlogwithname", func(c *gin.Context) {
 		time.Sleep(time.Second)
